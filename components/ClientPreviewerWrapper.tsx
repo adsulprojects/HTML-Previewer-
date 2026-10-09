@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 
 const HTMLPreviewer = dynamic(() => import('@/components/HTMLPreviewer'), {
@@ -13,12 +14,18 @@ const HTMLPreviewer = dynamic(() => import('@/components/HTMLPreviewer'), {
       {/* Skeleton / Initial Header */}
       <div className="h-14 border-b border-[#252C36] px-4 flex items-center justify-between bg-[#11161D] shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#7C3AED] flex items-center justify-center text-white shadow-sm shadow-[#7C3AED]/20">
-            <span className="font-mono text-sm font-bold">&lt;/&gt;</span>
-          </div>
+          <Image
+            src="/logo.png"
+            alt="HTML Previewer Logo"
+            width={32}
+            height={32}
+            className="w-8 h-8 rounded-lg object-contain shadow-sm bg-[#0B0F14] border border-[#252C36] shrink-0"
+            referrerPolicy="no-referrer"
+            priority
+          />
           <div>
             <span className="font-extrabold text-sm sm:text-base tracking-tight text-[#F5F7FA]">
-              HTML Previewer
+              <span>HTML</span> <span className="text-[#A78BFA]">Previewer</span>
             </span>
             <span className="hidden xl:inline-block ml-2 text-[11px] font-normal text-[#9CA3AF]">
               Write code. Preview instantly.

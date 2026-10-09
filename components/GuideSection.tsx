@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import {
   Code2,
   Play,
@@ -37,6 +38,17 @@ export function GuideSection() {
       <div className="max-w-5xl mx-auto space-y-16">
         {/* Main Section Header */}
         <div className="text-center space-y-4">
+          <div className="flex justify-center mb-1">
+            <Image
+              src="/logo.png"
+              alt="HTML Previewer Logo"
+              width={72}
+              height={72}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-contain shadow-xl border border-[var(--border-color)] bg-[#0B0F14]"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/20">
             <Code2 className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Developer Guide & Documentation</span>
@@ -355,8 +367,18 @@ export function GuideSection() {
 
         {/* Footer & Back to Editor Navigation */}
         <div className="pt-8 border-t border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--text-secondary)]">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-[var(--text-primary)]">HTML Previewer</span>
+          <div className="flex items-center gap-2.5">
+            <Image
+              src="/logo.png"
+              alt="HTML Previewer Logo"
+              width={24}
+              height={24}
+              className="w-6 h-6 rounded-md object-contain border border-[var(--border-color)] bg-[#0B0F14]"
+              referrerPolicy="no-referrer"
+            />
+            <span className="font-semibold text-[var(--text-primary)]">
+              <span>HTML</span> <span className="text-[#A78BFA]">Previewer</span>
+            </span>
             <span>·</span>
             <span>Write code. Preview instantly.</span>
           </div>

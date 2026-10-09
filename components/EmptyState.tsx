@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Code2, LayoutTemplate, Play } from 'lucide-react';
 
 interface EmptyStateProps {
@@ -19,14 +20,19 @@ export function EmptyState({ theme = 'dark', onStartCoding, onBrowseTemplates }:
       <div className={`max-w-md w-full rounded-2xl p-8 text-center shadow-2xl border transition-colors ${
         isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-[#11161D] border-[#252C36] text-[#F5F7FA]'
       }`}>
-        <div className="w-16 h-16 rounded-2xl bg-[#7C3AED]/20 border border-[#7C3AED]/30 flex items-center justify-center text-[#7C3AED] mx-auto mb-6">
-          <Code2 className="w-8 h-8" />
-        </div>
+        <Image
+          src="/logo.png"
+          alt="HTML Previewer Logo"
+          width={64}
+          height={64}
+          className="w-16 h-16 rounded-2xl mx-auto mb-6 object-contain shadow-lg border border-[#252C36] bg-[#0B0F14]"
+          referrerPolicy="no-referrer"
+        />
 
         <h2 className={`text-2xl font-extrabold tracking-tight mb-2 ${
           isLight ? 'text-slate-900' : 'text-[#F5F7FA]'
         }`}>
-          HTML Previewer
+          <span>HTML</span> <span className="text-[#A78BFA]">Previewer</span>
         </h2>
         <p className={`text-sm mb-8 ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>
           Write code. Preview instantly.

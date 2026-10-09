@@ -50,6 +50,11 @@ export const metadata: Metadata = {
     description:
       'Free online HTML previewer and sandbox. Write, test, and preview HTML, CSS, and JavaScript in real time with an instant sandboxed iframe, responsive viewports, and developer console.',
   },
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({

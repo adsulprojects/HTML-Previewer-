@@ -7,6 +7,8 @@ export function StructuredData() {
     name: 'HTML Previewer',
     alternateName: 'Free Online HTML Previewer',
     url: 'https://html-previewer-steel.vercel.app/',
+    image: 'https://html-previewer-steel.vercel.app/logo.png',
+    logo: 'https://html-previewer-steel.vercel.app/logo.png',
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'All',
     browserRequirements: 'Requires modern web browser with JavaScript enabled',
