@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://html-previewer-steel.vercel.app/sitemap.xml

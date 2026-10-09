@@ -18,7 +18,8 @@ import {
   FolderKanban,
   Columns,
   Square,
-  Sparkles
+  Sparkles,
+  BookOpen
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -174,6 +175,19 @@ export function Header({
             <Keyboard className="w-3.5 h-3.5 text-[#38BDF8]" />
             <span>Shortcuts</span>
           </button>
+
+          <a
+            href="#guide"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+              isLight
+                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                : 'text-[#CBD5E1] hover:text-white hover:bg-[#151B23]'
+            }`}
+            title="HTML Previewer Guide & FAQ"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Guide</span>
+          </a>
         </nav>
 
         {/* Right Controls */}
@@ -400,6 +414,17 @@ export function Header({
               <SettingsIcon className="w-4 h-4 text-emerald-500" />
               <span>Settings</span>
             </button>
+
+            <a
+              href="#guide"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`flex items-center justify-center gap-2 p-2.5 rounded-lg font-medium border col-span-2 ${
+                isLight ? 'bg-slate-50 text-slate-800 border-slate-200' : 'bg-[#151B23] text-white border-[#252C36]'
+              }`}
+            >
+              <BookOpen className="w-4 h-4 text-emerald-400" />
+              <span>Guide &amp; Documentation</span>
+            </a>
           </div>
 
           {/* Theme Quick Toggle in Mobile Drawer */}

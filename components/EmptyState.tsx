@@ -23,11 +23,11 @@ export function EmptyState({ theme = 'dark', onStartCoding, onBrowseTemplates }:
           <Code2 className="w-8 h-8" />
         </div>
 
-        <h1 className={`text-2xl font-extrabold tracking-tight mb-2 ${
+        <h2 className={`text-2xl font-extrabold tracking-tight mb-2 ${
           isLight ? 'text-slate-900' : 'text-[#F5F7FA]'
         }`}>
           HTML Previewer
-        </h1>
+        </h2>
         <p className={`text-sm mb-8 ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>
           Write code. Preview instantly.
         </p>

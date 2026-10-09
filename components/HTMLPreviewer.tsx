@@ -481,9 +481,12 @@ export default function HTMLPreviewer() {
   const isLight = theme === 'light';
 
   return (
-    <div className={`flex flex-col h-screen h-[100dvh] w-full overflow-hidden transition-colors ${
-      isLight ? 'theme-light bg-[#F8FAFC] text-[#0F172A]' : 'bg-[#0B0F14] text-[#F5F7FA]'
-    }`}>
+    <div
+      id="editor"
+      className={`flex flex-col h-[100dvh] w-full shrink-0 overflow-hidden transition-colors ${
+        isLight ? 'theme-light bg-[#F8FAFC] text-[#0F172A]' : 'bg-[#0B0F14] text-[#F5F7FA]'
+      }`}
+    >
       {/* Hidden File Input for HTML Import */}
       <input
         ref={fileInputRef}
