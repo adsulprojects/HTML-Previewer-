@@ -12,22 +12,22 @@ const HTMLPreviewer = dynamic(() => import('@/components/HTMLPreviewer'), {
       className="flex flex-col h-[100dvh] w-full shrink-0 overflow-hidden bg-[#0B0F14] text-[#F5F7FA] select-none"
     >
       {/* Skeleton / Initial Header */}
-      <div className="h-14 border-b border-[#252C36] px-4 flex items-center justify-between bg-[#11161D] shrink-0">
-        <div className="flex items-center gap-2.5">
+      <div className="h-16 sm:h-[68px] border-b border-[#252C36] px-3.5 sm:px-6 flex items-center justify-between bg-[#11161D] shrink-0 font-[var(--font-manrope)]">
+        <div className="flex items-center gap-3 shrink-0">
           <Image
             src="/logo.png"
             alt="HTML Previewer Logo"
-            width={32}
-            height={32}
-            className="w-8 h-8 rounded-lg object-contain shadow-sm bg-[#0B0F14] border border-[#252C36] shrink-0"
+            width={40}
+            height={40}
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain shadow-sm bg-[#0B0F14] border border-[#252C36] shrink-0"
             referrerPolicy="no-referrer"
             priority
           />
           <div>
-            <span className="font-extrabold text-sm sm:text-base tracking-tight text-[#F5F7FA]">
+            <span className="font-extrabold text-[15px] sm:text-lg tracking-tight text-[#F5F7FA]">
               <span>HTML</span> <span className="text-[#A78BFA]">Previewer</span>
             </span>
-            <span className="hidden xl:inline-block ml-2 text-[11px] font-normal text-[#9CA3AF]">
+            <span className="hidden xl:inline-block ml-2.5 text-xs font-normal text-[#9CA3AF]">
               Write code. Preview instantly.
             </span>
           </div>

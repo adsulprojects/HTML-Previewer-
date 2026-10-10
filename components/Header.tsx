@@ -14,8 +14,6 @@ import {
   Download,
   Upload,
   Save,
-  Menu,
-  X,
   FolderKanban,
   Columns,
   Square,
@@ -70,72 +68,77 @@ export function Header({
   const isLight = theme === 'light';
 
   return (
-    <header className={`${isLight ? 'bg-white border-b border-slate-200 text-slate-900' : 'bg-[#11161D] border-b border-[#252C36] text-[#F5F7FA]'} select-none sticky top-0 z-40 w-full transition-colors`}>
-      <div className="w-full px-3 sm:px-4 h-14 flex items-center justify-between gap-2">
+    <header className={`${isLight ? 'bg-white/95 border-b border-slate-200/90 text-slate-900' : 'bg-[#11161D]/95 border-b border-[#252C36] text-[#F5F7FA]'} backdrop-blur-md select-none sticky top-0 z-40 w-full transition-colors font-[var(--font-manrope)]`}>
+      <div className="w-full px-3.5 sm:px-6 h-16 sm:h-[68px] flex items-center justify-between gap-3 sm:gap-4">
         {/* Logo and Tagline */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2.5">
-            <Image
-              src="/logo.png"
-              alt="HTML Previewer Logo"
-              width={32}
-              height={32}
-              className="w-8 h-8 rounded-lg object-contain shadow-sm bg-[#0B0F14] border border-[#252C36] shrink-0"
-              referrerPolicy="no-referrer"
-              priority
-            />
-            <div>
-              <span className={`font-extrabold text-sm sm:text-base tracking-tight ${isLight ? 'text-slate-900' : 'text-[#F5F7FA]'}`}>
-                <span>HTML</span> <span className="text-[#A78BFA]">Previewer</span>
-              </span>
-              <span className={`hidden xl:inline-block ml-2 text-[11px] font-normal ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>
-                Write code. Preview instantly.
-              </span>
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="relative group">
+              <Image
+                src="/logo.png"
+                alt="HTML Previewer Logo"
+                width={40}
+                height={40}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain shadow-sm bg-[#0B0F14] border border-[#252C36] shrink-0 transition-transform duration-200 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+                priority
+              />
+            </div>
+            <div className="flex flex-col justify-center">
+              <div className="flex items-baseline">
+                <span className={`font-extrabold text-[15px] sm:text-lg tracking-tight font-[var(--font-manrope)] leading-none ${isLight ? 'text-slate-900' : 'text-[#F5F7FA]'}`}>
+                  <span>HTML</span> <span className="text-[#A78BFA]">Previewer</span>
+                </span>
+                <span className={`hidden xl:inline-block ml-2.5 text-xs font-normal tracking-normal ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>
+                  Write code. Preview instantly.
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Project Title Badge */}
           <button
             onClick={onOpenProjects}
-            className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs transition-colors ml-1 ${
+            className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs sm:text-[13px] font-medium transition-all ml-1 ${
               isLight
-                ? 'bg-slate-100 border-slate-200 hover:border-[#7C3AED]/50 text-slate-700'
-                : 'bg-[#151B23] border-[#252C36] hover:border-[#7C3AED]/50 text-[#CBD5E1]'
+                ? 'bg-slate-100/80 border-slate-200 hover:border-[#7C3AED]/50 text-slate-700 hover:bg-slate-100'
+                : 'bg-[#151B23] border-[#252C36] hover:border-[#7C3AED]/50 text-[#CBD5E1] hover:bg-[#1A222C]'
             }`}
             title="Switch or rename project"
+            aria-label={`Current project: ${projectName}. Click to switch or rename`}
           >
-            <FolderKanban className="w-3.5 h-3.5 text-[#7C3AED]" />
-            <span className="max-w-[130px] truncate font-medium">{projectName}</span>
+            <FolderKanban className="w-4 h-4 text-[#7C3AED] shrink-0" />
+            <span className="max-w-[140px] truncate">{projectName}</span>
           </button>
         </div>
 
         {/* Desktop / Tablet Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-2" aria-label="Editor view modes and tools">
           {/* View Mode Switcher */}
-          <div className={`flex items-center p-0.5 rounded-lg border mr-2 ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#151B23] border-[#252C36]'}`}>
+          <div className={`flex items-center p-1 rounded-xl border ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#151B23] border-[#252C36]'}`}>
             <button
               onClick={() => onChangeViewMode('split')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-[13px] font-semibold transition-all ${
                 viewMode === 'split'
                   ? isLight
                     ? 'bg-white text-slate-900 shadow-xs'
-                    : 'bg-[#252C36] text-white'
+                    : 'bg-[#252C36] text-white shadow-xs'
                   : isLight
                   ? 'text-slate-600 hover:text-slate-900'
                   : 'text-[#9CA3AF] hover:text-white'
               }`}
-              title="Split View (Editor & Preview)"
+              title="Split View (Editor & Live Preview side by side)"
             >
-              <Columns className="w-3.5 h-3.5" />
+              <Columns className="w-4 h-4" />
               <span>Split</span>
             </button>
             <button
               onClick={() => onChangeViewMode('editor')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-[13px] font-semibold transition-all ${
                 viewMode === 'editor'
                   ? isLight
                     ? 'bg-white text-slate-900 shadow-xs'
-                    : 'bg-[#252C36] text-white'
+                    : 'bg-[#252C36] text-white shadow-xs'
                   : isLight
                   ? 'text-slate-600 hover:text-slate-900'
                   : 'text-[#9CA3AF] hover:text-white'
@@ -146,14 +149,14 @@ export function Header({
             </button>
             <button
               onClick={() => onChangeViewMode('preview')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-[13px] font-semibold transition-all ${
                 viewMode === 'preview'
                   ? 'bg-[#7C3AED] text-white shadow-xs'
                   : isLight
                   ? 'text-slate-600 hover:text-slate-900'
                   : 'text-[#9CA3AF] hover:text-white'
               }`}
-              title="Preview Only (Full Width)"
+              title="Preview Only (Full Width Canvas)"
             >
               <span>Preview</span>
             </button>
@@ -161,148 +164,177 @@ export function Header({
 
           <button
             onClick={onOpenTemplates}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-[13px] font-semibold transition-colors ${
               isLight
                 ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 : 'text-[#CBD5E1] hover:text-white hover:bg-[#151B23]'
             }`}
+            title="Browse starter templates"
           >
-            <LayoutTemplate className="w-3.5 h-3.5 text-[#A78BFA]" />
+            <LayoutTemplate className="w-4 h-4 text-[#A78BFA]" />
             <span>Templates</span>
           </button>
 
           <button
             onClick={onOpenShortcuts}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-[13px] font-semibold transition-colors ${
               isLight
                 ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 : 'text-[#CBD5E1] hover:text-white hover:bg-[#151B23]'
             }`}
+            title="Keyboard shortcuts (Ctrl/Cmd + /)"
           >
-            <Keyboard className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <Keyboard className="w-4 h-4 text-[#38BDF8]" />
             <span>Shortcuts</span>
           </button>
 
           <a
             href="#guide"
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-[13px] font-semibold transition-colors ${
               isLight
                 ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 : 'text-[#CBD5E1] hover:text-white hover:bg-[#151B23]'
             }`}
             title="HTML Previewer Guide & FAQ"
           >
-            <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+            <BookOpen className="w-4 h-4 text-emerald-400" />
             <span>Guide</span>
           </a>
         </nav>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
           {/* Quick File Action Buttons */}
           <button
             onClick={onSaveProject}
-            className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-xs font-semibold transition-colors ${
+            className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-lg border text-xs sm:text-[13px] font-semibold transition-all ${
               isLight
-                ? 'bg-slate-100 border-slate-200 hover:border-[#22C55E]/60 text-slate-800'
-                : 'bg-[#151B23] border-[#252C36] hover:border-[#22C55E]/40 text-[#F5F7FA]'
+                ? 'bg-slate-100 border-slate-200 hover:border-[#22C55E]/60 text-slate-800 hover:bg-slate-200/60'
+                : 'bg-[#151B23] border-[#252C36] hover:border-[#22C55E]/50 text-[#F5F7FA] hover:bg-[#1A222C]'
             }`}
             title="Save Project (Ctrl/Cmd + S)"
+            aria-label="Save Project"
           >
-            <Save className="w-3.5 h-3.5 text-[#22C55E]" />
+            <Save className="w-4 h-4 text-[#22C55E]" />
             <span className="hidden xl:inline">Save</span>
           </button>
 
           <button
             onClick={onImportHtml}
-            className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border text-xs font-semibold transition-colors ${
+            className={`hidden md:flex items-center gap-2 px-3 py-2 rounded-lg border text-xs sm:text-[13px] font-semibold transition-all ${
               isLight
-                ? 'bg-slate-100 border-slate-200 hover:border-[#38BDF8]/60 text-slate-800'
-                : 'bg-[#151B23] border-[#252C36] hover:border-[#38BDF8]/40 text-[#F5F7FA]'
+                ? 'bg-slate-100 border-slate-200 hover:border-[#38BDF8]/60 text-slate-800 hover:bg-slate-200/60'
+                : 'bg-[#151B23] border-[#252C36] hover:border-[#38BDF8]/50 text-[#F5F7FA] hover:bg-[#1A222C]'
             }`}
             title="Import HTML file"
+            aria-label="Import HTML file"
           >
-            <Upload className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <Upload className="w-4 h-4 text-[#38BDF8]" />
             <span className="hidden xl:inline">Import</span>
           </button>
 
-          <button
-            onClick={onDownloadHtml}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#7C3AED] hover:bg-[#6D28D9] text-xs font-semibold text-white shadow-sm transition-colors"
-            title="Download Standalone HTML"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Export</span>
-          </button>
+          {/* Download button has been removed from header per user instructions */}
 
-          <div className={`h-4 w-px mx-1 hidden sm:block ${isLight ? 'bg-slate-200' : 'bg-[#252C36]'}`} />
+          <div className={`h-5 w-px mx-0.5 hidden sm:block ${isLight ? 'bg-slate-200' : 'bg-[#252C36]'}`} />
 
           {/* Theme Toggle Button */}
           <button
             onClick={onToggleTheme}
-            className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
+            className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center border ${
               isLight
-                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                : 'text-[#9CA3AF] hover:text-white hover:bg-[#151B23]'
+                ? 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300'
+                : 'bg-[#151B23] border-[#252C36] text-[#CBD5E1] hover:text-white hover:bg-[#1C232E] hover:border-[#333B47]'
             }`}
             title={`Switch to ${isLight ? 'Dark' : 'Light'} theme`}
             aria-label="Toggle theme"
           >
             {isLight ? (
-              <Moon className="w-4 h-4 text-[#7C3AED]" />
+              <Moon className="w-[18px] h-[18px] text-[#7C3AED]" />
             ) : (
-              <Sun className="w-4 h-4 text-amber-400" />
+              <Sun className="w-[18px] h-[18px] text-amber-400" />
             )}
           </button>
 
           {/* Settings */}
           <button
             onClick={onOpenSettings}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center border ${
               isLight
-                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                : 'text-[#9CA3AF] hover:text-white hover:bg-[#151B23]'
+                ? 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300'
+                : 'bg-[#151B23] border-[#252C36] text-[#CBD5E1] hover:text-white hover:bg-[#1C232E] hover:border-[#333B47]'
             }`}
             title="Editor Settings"
             aria-label="Open settings"
           >
-            <SettingsIcon className="w-4 h-4" />
+            <SettingsIcon className="w-[18px] h-[18px]" />
           </button>
 
           {/* Fullscreen */}
           <button
             onClick={toggleBrowserFullscreen}
-            className={`hidden sm:flex p-2 rounded-lg transition-colors ${
+            className={`hidden sm:flex w-10 h-10 rounded-xl transition-all items-center justify-center border ${
               isLight
-                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                : 'text-[#9CA3AF] hover:text-white hover:bg-[#151B23]'
+                ? 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300'
+                : 'bg-[#151B23] border-[#252C36] text-[#CBD5E1] hover:text-white hover:bg-[#1C232E] hover:border-[#333B47]'
             }`}
             title={isBrowserFullscreen ? 'Exit Fullscreen' : 'Fullscreen Window'}
             aria-label="Toggle fullscreen"
           >
-            {isBrowserFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+            {isBrowserFullscreen ? <Minimize className="w-[18px] h-[18px]" /> : <Maximize className="w-[18px] h-[18px]" />}
           </button>
 
-          {/* Mobile Hamburger Menu Toggle */}
+          {/* Redesigned Premium Animated Menu Control (44px mobile touch target) */}
           <button
+            type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`lg:hidden p-2 rounded-lg transition-colors ml-1 ${
+            className={`md:hidden relative w-11 h-11 flex flex-col items-center justify-center rounded-xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] ${
               isLight
-                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                : 'text-[#9CA3AF] hover:text-white hover:bg-[#151B23]'
+                ? isMobileMenuOpen
+                  ? 'bg-slate-100 border-[#7C3AED]/40 text-slate-900 shadow-xs'
+                  : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700 hover:border-slate-300'
+                : isMobileMenuOpen
+                ? 'bg-[#18202A] border-[#7C3AED]/50 text-white shadow-xs'
+                : 'bg-[#151B23] border-[#252C36] hover:bg-[#1C232E] hover:border-[#333B47] text-[#CBD5E1]'
             }`}
-            aria-label="Toggle mobile menu"
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation-drawer"
           >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            <div className="w-5 h-3.5 relative flex flex-col justify-between pointer-events-none">
+              <span
+                className={`h-[2px] rounded-full transition-all duration-250 ease-in-out origin-center ${
+                  isMobileMenuOpen
+                    ? 'w-5 translate-y-[6px] rotate-45 bg-[#A78BFA]'
+                    : 'w-5 bg-current'
+                }`}
+              />
+              <span
+                className={`h-[2px] rounded-full transition-all duration-200 ease-in-out ${
+                  isMobileMenuOpen
+                    ? 'w-0 opacity-0 -translate-x-1'
+                    : 'w-3.5 ml-auto bg-[#A78BFA]'
+                }`}
+              />
+              <span
+                className={`h-[2px] rounded-full transition-all duration-250 ease-in-out origin-center ${
+                  isMobileMenuOpen
+                    ? 'w-5 -translate-y-[6px] -rotate-45 bg-[#A78BFA]'
+                    : 'w-[18px] bg-current'
+                }`}
+              />
+            </div>
           </button>
         </div>
       </div>
 
       {/* Mobile Animated Drawer */}
       {isMobileMenuOpen && (
-        <div className={`md:hidden border-b px-4 py-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-150 ${
-          isLight ? 'bg-white border-slate-200' : 'bg-[#11161D] border-[#252C36]'
-        }`}>
+        <div
+          id="mobile-navigation-drawer"
+          className={`md:hidden border-b px-4 py-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200 ${
+            isLight ? 'bg-white border-slate-200' : 'bg-[#11161D] border-[#252C36]'
+          }`}
+        >
           <div className={`flex items-center justify-between pb-2 border-b ${isLight ? 'border-slate-200' : 'border-[#252C36]'}`}>
             <span className={`text-xs font-semibold ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>Current Project:</span>
             <button
@@ -310,24 +342,24 @@ export function Header({
                 onOpenProjects();
                 setIsMobileMenuOpen(false);
               }}
-              className="text-xs font-bold text-[#7C3AED] underline"
+              className="text-xs font-bold text-[#7C3AED] hover:underline"
             >
               {projectName}
             </button>
           </div>
 
           {/* Mobile View Mode Selection */}
-          <div className={`flex items-center p-1 rounded-lg border ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#151B23] border-[#252C36]'}`}>
+          <div className={`flex items-center p-1 rounded-xl border ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#151B23] border-[#252C36]'}`}>
             <button
               onClick={() => {
                 onChangeViewMode('split');
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex-1 py-1.5 rounded-md text-xs font-semibold text-center transition-colors ${
+              className={`flex-1 py-2 rounded-lg text-xs font-semibold text-center transition-all ${
                 viewMode === 'split'
                   ? isLight
                     ? 'bg-white text-slate-900 shadow-xs'
-                    : 'bg-[#252C36] text-white'
+                    : 'bg-[#252C36] text-white shadow-xs'
                   : isLight
                   ? 'text-slate-600'
                   : 'text-[#9CA3AF]'
@@ -340,11 +372,11 @@ export function Header({
                 onChangeViewMode('editor');
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex-1 py-1.5 rounded-md text-xs font-semibold text-center transition-colors ${
+              className={`flex-1 py-2 rounded-lg text-xs font-semibold text-center transition-all ${
                 viewMode === 'editor'
                   ? isLight
                     ? 'bg-white text-slate-900 shadow-xs'
-                    : 'bg-[#252C36] text-white'
+                    : 'bg-[#252C36] text-white shadow-xs'
                   : isLight
                   ? 'text-slate-600'
                   : 'text-[#9CA3AF]'
@@ -357,7 +389,7 @@ export function Header({
                 onChangeViewMode('preview');
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex-1 py-1.5 rounded-md text-xs font-semibold text-center transition-colors ${
+              className={`flex-1 py-2 rounded-lg text-xs font-semibold text-center transition-all ${
                 viewMode === 'preview'
                   ? 'bg-[#7C3AED] text-white shadow-xs'
                   : isLight
@@ -375,11 +407,11 @@ export function Header({
                 onOpenTemplates();
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex items-center gap-2 p-2.5 rounded-lg font-medium border ${
-                isLight ? 'bg-slate-50 text-slate-800 border-slate-200' : 'bg-[#151B23] text-white border-[#252C36]'
+              className={`flex items-center gap-2.5 p-3 rounded-xl font-medium border min-h-[44px] transition-colors ${
+                isLight ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100' : 'bg-[#151B23] text-white border-[#252C36] hover:bg-[#1E2530]'
               }`}
             >
-              <LayoutTemplate className="w-4 h-4 text-[#A78BFA]" />
+              <LayoutTemplate className="w-4 h-4 text-[#A78BFA] shrink-0" />
               <span>Templates</span>
             </button>
 
@@ -388,11 +420,11 @@ export function Header({
                 onOpenProjects();
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex items-center gap-2 p-2.5 rounded-lg font-medium border ${
-                isLight ? 'bg-slate-50 text-slate-800 border-slate-200' : 'bg-[#151B23] text-white border-[#252C36]'
+              className={`flex items-center gap-2.5 p-3 rounded-xl font-medium border min-h-[44px] transition-colors ${
+                isLight ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100' : 'bg-[#151B23] text-white border-[#252C36] hover:bg-[#1E2530]'
               }`}
             >
-              <FolderKanban className="w-4 h-4 text-[#7C3AED]" />
+              <FolderKanban className="w-4 h-4 text-[#7C3AED] shrink-0" />
               <span>Projects</span>
             </button>
 
@@ -401,11 +433,11 @@ export function Header({
                 onOpenShortcuts();
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex items-center gap-2 p-2.5 rounded-lg font-medium border ${
-                isLight ? 'bg-slate-50 text-slate-800 border-slate-200' : 'bg-[#151B23] text-white border-[#252C36]'
+              className={`flex items-center gap-2.5 p-3 rounded-xl font-medium border min-h-[44px] transition-colors ${
+                isLight ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100' : 'bg-[#151B23] text-white border-[#252C36] hover:bg-[#1E2530]'
               }`}
             >
-              <Keyboard className="w-4 h-4 text-[#38BDF8]" />
+              <Keyboard className="w-4 h-4 text-[#38BDF8] shrink-0" />
               <span>Shortcuts</span>
             </button>
 
@@ -414,22 +446,22 @@ export function Header({
                 onOpenSettings();
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex items-center gap-2 p-2.5 rounded-lg font-medium border ${
-                isLight ? 'bg-slate-50 text-slate-800 border-slate-200' : 'bg-[#151B23] text-white border-[#252C36]'
+              className={`flex items-center gap-2.5 p-3 rounded-xl font-medium border min-h-[44px] transition-colors ${
+                isLight ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100' : 'bg-[#151B23] text-white border-[#252C36] hover:bg-[#1E2530]'
               }`}
             >
-              <SettingsIcon className="w-4 h-4 text-emerald-500" />
+              <SettingsIcon className="w-4 h-4 text-emerald-500 shrink-0" />
               <span>Settings</span>
             </button>
 
             <a
               href="#guide"
               onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center justify-center gap-2 p-2.5 rounded-lg font-medium border col-span-2 ${
-                isLight ? 'bg-slate-50 text-slate-800 border-slate-200' : 'bg-[#151B23] text-white border-[#252C36]'
+              className={`flex items-center justify-center gap-2.5 p-3 rounded-xl font-medium border col-span-2 min-h-[44px] transition-colors ${
+                isLight ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100' : 'bg-[#151B23] text-white border-[#252C36] hover:bg-[#1E2530]'
               }`}
             >
-              <BookOpen className="w-4 h-4 text-emerald-400" />
+              <BookOpen className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>Guide &amp; Documentation</span>
             </a>
           </div>
@@ -439,15 +471,15 @@ export function Header({
             onClick={() => {
               onToggleTheme();
             }}
-            className={`w-full flex items-center justify-between p-2.5 rounded-lg font-medium border text-xs ${
+            className={`w-full flex items-center justify-between p-3 rounded-xl font-medium border text-xs min-h-[44px] transition-colors ${
               isLight ? 'bg-slate-50 text-slate-800 border-slate-200' : 'bg-[#151B23] text-white border-[#252C36]'
             }`}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {isLight ? <Moon className="w-4 h-4 text-[#7C3AED]" /> : <Sun className="w-4 h-4 text-amber-400" />}
-              <span>Theme</span>
+              <span>Interface Theme</span>
             </div>
-            <span className="font-semibold text-[11px] px-2 py-0.5 rounded bg-[#7C3AED]/15 text-[#7C3AED]">
+            <span className="font-semibold text-[11px] px-2.5 py-1 rounded-md bg-[#7C3AED]/15 text-[#7C3AED]">
               {isLight ? 'Light Mode' : 'Dark Mode'}
             </span>
           </button>
@@ -458,11 +490,11 @@ export function Header({
                 onSaveProject();
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-semibold ${
-                isLight ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-[#151B23] border-[#252C36] text-white'
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold min-h-[44px] transition-all ${
+                isLight ? 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200' : 'bg-[#151B23] border-[#252C36] text-white hover:bg-[#1E2530]'
               }`}
             >
-              <Save className="w-3.5 h-3.5 text-[#22C55E]" />
+              <Save className="w-4 h-4 text-[#22C55E]" />
               <span>Save</span>
             </button>
 
@@ -471,11 +503,11 @@ export function Header({
                 onImportHtml();
                 setIsMobileMenuOpen(false);
               }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs font-semibold ${
-                isLight ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-[#151B23] border-[#252C36] text-white'
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold min-h-[44px] transition-all ${
+                isLight ? 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200' : 'bg-[#151B23] border-[#252C36] text-white hover:bg-[#1E2530]'
               }`}
             >
-              <Upload className="w-3.5 h-3.5 text-[#38BDF8]" />
+              <Upload className="w-4 h-4 text-[#38BDF8]" />
               <span>Import</span>
             </button>
 
@@ -484,9 +516,9 @@ export function Header({
                 onDownloadHtml();
                 setIsMobileMenuOpen(false);
               }}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#7C3AED] text-xs font-semibold text-white"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#7C3AED] hover:bg-[#6D28D9] text-xs font-semibold text-white min-h-[44px] shadow-sm transition-all"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-4 h-4" />
               <span>Export</span>
             </button>
           </div>
