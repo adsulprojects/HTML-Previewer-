@@ -4,19 +4,15 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Language, EditorSettings } from '@/lib/types';
 import {
   Code2,
-  FileCode,
-  FileType,
   Undo2,
   Redo2,
   Copy,
   Trash2,
   Search,
-  Check,
   ChevronDown,
   ChevronUp,
   X,
   WrapText,
-  AlignLeft,
   Sparkles,
   Upload
 } from 'lucide-react';
@@ -40,6 +36,79 @@ interface CodeEditorProps {
   onChangeJs?: (val: string) => void;
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function highlightHtml(code: string, isLight: boolean): string {
+  if (!code) return '';
+
+  const tokenRegex = /(<!--[\s\S]*?-->)|(<!DOCTYPE[^>]*>)|(<\/?)([a-zA-Z0-9\-:]+)([^>]*?)(\/?>)|([^<]+)/gi;
+
+  return code.replace(
+    tokenRegex,
+    (
+      match: string,
+      comment?: string,
+      doctype?: string,
+      tagStart?: string,
+      tagName?: string,
+      tagAttrs?: string,
+      tagEnd?: string,
+      text?: string
+    ) => {
+      if (comment) {
+        return `<span style="color: ${isLight ? '#64748B' : '#71717A'}; font-style: italic;">${escapeHtml(comment)}</span>`;
+      }
+      if (doctype) {
+        return `<span style="color: ${isLight ? '#DB2777' : '#F472B6'}; font-weight: 600;">${escapeHtml(doctype)}</span>`;
+      }
+      if (tagStart && tagName) {
+        const escStart = escapeHtml(tagStart);
+        const escName = escapeHtml(tagName);
+        const escEnd = tagEnd ? escapeHtml(tagEnd) : '';
+
+        let highlightedAttrs = '';
+        if (tagAttrs) {
+          highlightedAttrs = tagAttrs.replace(
+            /([a-zA-Z0-9\-:@]+)(\s*=\s*)("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[^\s>]+)?/g,
+            (_: string, attrName: string, eq?: string, attrVal?: string) => {
+              const nameColor = isLight ? '#D97706' : '#FBBF24';
+              const eqColor = isLight ? '#94A3B8' : '#6B7280';
+              const valColor = isLight ? '#059669' : '#34D399';
+
+              const nameSpan = `<span style="color: ${nameColor};">${escapeHtml(attrName)}</span>`;
+              const eqSpan = eq ? `<span style="color: ${eqColor};">${escapeHtml(eq)}</span>` : '';
+              const valSpan = attrVal ? `<span style="color: ${valColor};">${escapeHtml(attrVal)}</span>` : '';
+              return nameSpan + eqSpan + valSpan;
+            }
+          );
+        }
+
+        const tagBracketColor = isLight ? '#7C3AED' : '#A78BFA';
+        const tagNameColor = isLight ? '#6D28D9' : '#C4B5FD';
+
+        return `<span style="color: ${tagBracketColor};">${escStart}</span>` +
+          `<span style="color: ${tagNameColor}; font-weight: 600;">${escName}</span>` +
+          highlightedAttrs +
+          (escEnd ? `<span style="color: ${tagBracketColor};">${escEnd}</span>` : '');
+      }
+      if (text) {
+        const escaped = escapeHtml(text);
+        const entityColor = isLight ? '#0284C7' : '#38BDF8';
+        const textColor = isLight ? '#0F172A' : '#E6EDF3';
+        return `<span style="color: ${textColor};">${escaped.replace(/&amp;([a-zA-Z0-9#]+;)/g, `<span style="color: ${entityColor}; font-weight: 600;">&amp;$1</span>`)}</span>`;
+      }
+      return escapeHtml(match);
+    }
+  );
+}
+
 export function CodeEditor({
   theme,
   html,
@@ -58,6 +127,9 @@ export function CodeEditor({
   const historyIndexRef = useRef<number>(0);
   const isUndoRedoAction = useRef<boolean>(false);
 
+  // Active cursor line tracking for gutter highlight
+  const [activeLine, setActiveLine] = useState<number>(1);
+
   // Search & Replace states
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -67,9 +139,10 @@ export function CodeEditor({
   // Drag and drop state
   const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
 
-  // Line numbers scroll synchronization
+  // Synchronized refs
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
 
   // Current code value is strictly HTML
   const currentCode = html;
@@ -79,6 +152,20 @@ export function CodeEditor({
     },
     [onChangeHtml]
   );
+
+  const updateActiveLine = useCallback(() => {
+    if (textareaRef.current) {
+      const cursor = textareaRef.current.selectionStart || 0;
+      const line = currentCode.slice(0, cursor).split('\n').length;
+      setActiveLine(line);
+    }
+  }, [currentCode]);
+
+  // Syntax highlighted HTML (memoized for optimal performance)
+  const highlightedCodeHtml = useMemo(() => {
+    if (settings.syntaxHighlighting === false) return '';
+    return highlightHtml(currentCode, isLight);
+  }, [currentCode, isLight, settings.syntaxHighlighting]);
 
   // Record undo history (debounced)
   useEffect(() => {
@@ -148,10 +235,17 @@ export function CodeEditor({
     }
   };
 
-  // Scroll sync for line numbers
+  // Scroll sync for line numbers and syntax highlight pre layer
   const handleScroll = () => {
-    if (textareaRef.current && lineNumbersRef.current) {
-      lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
+    if (textareaRef.current) {
+      const { scrollTop, scrollLeft } = textareaRef.current;
+      if (lineNumbersRef.current) {
+        lineNumbersRef.current.scrollTop = scrollTop;
+      }
+      if (preRef.current) {
+        preRef.current.scrollTop = scrollTop;
+        preRef.current.scrollLeft = scrollLeft;
+      }
     }
   };
 
@@ -399,125 +493,144 @@ export function CodeEditor({
         }`}>
           <Upload className="w-12 h-12 text-[#7C3AED] animate-bounce mb-2" />
           <p className="text-base font-bold">Drop HTML file to import</p>
-          <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>Will parse HTML, CSS, and JS automatically</p>
+          <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>Will load your HTML code directly</p>
         </div>
       )}
 
-      {/* Editor Tabs & Toolbar Header */}
-      <div className={`flex flex-wrap items-center justify-between gap-1 px-3 py-1.5 border-b text-xs transition-colors ${
+      {/* Editor Header & Action Controls Toolbar */}
+      <div className={`flex items-center justify-between gap-2 px-2.5 sm:px-3 h-10 border-b select-none text-xs transition-colors shrink-0 overflow-x-auto ${
         isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#11161D] border-[#252C36]'
       }`}>
         {/* HTML Editor Badge */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <div
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs select-none transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-semibold text-xs select-none transition-colors ${
               isLight
                 ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
                 : 'bg-[#151B23] text-[#F5F7FA] border border-[#252C36] shadow-sm'
             }`}
           >
             <Code2 className="w-3.5 h-3.5 text-[#F97316]" />
-            <span>HTML</span>
+            <span className="font-bold">HTML</span>
             <span className={`text-[10px] font-mono ml-0.5 ${isLight ? 'text-slate-400' : 'text-[#6B7280]'}`}>
-              ({linesCount} lines)
+              ({linesCount})
             </span>
           </div>
         </div>
 
         {/* Action Controls Toolbar */}
-        <div className={`flex items-center gap-0.5 ${isLight ? 'text-slate-600' : 'text-[#9CA3AF]'}`}>
+        <div className={`flex items-center gap-0.5 sm:gap-1 shrink-0 ${isLight ? 'text-slate-600' : 'text-[#9CA3AF]'}`}>
           <button
             onClick={handleUndo}
-            className={`p-1.5 rounded transition-colors ${isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-[#151B23]'}`}
+            className={`p-1.5 rounded-lg transition-colors touch-manipulation cursor-pointer ${
+              isLight ? 'hover:text-slate-900 hover:bg-slate-200/70' : 'hover:text-white hover:bg-[#151B23]'
+            }`}
             title="Undo (Ctrl/Cmd + Z)"
+            aria-label="Undo code change"
           >
             <Undo2 className="w-3.5 h-3.5" />
           </button>
 
           <button
             onClick={handleRedo}
-            className={`p-1.5 rounded transition-colors ${isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-[#151B23]'}`}
+            className={`p-1.5 rounded-lg transition-colors touch-manipulation cursor-pointer ${
+              isLight ? 'hover:text-slate-900 hover:bg-slate-200/70' : 'hover:text-white hover:bg-[#151B23]'
+            }`}
             title="Redo (Ctrl/Cmd + Shift + Z)"
+            aria-label="Redo code change"
           >
             <Redo2 className="w-3.5 h-3.5" />
           </button>
 
-          <div className={`h-4 w-px mx-1 ${isLight ? 'bg-slate-200' : 'bg-[#252C36]'}`} />
+          <div className={`h-4 w-px mx-0.5 sm:mx-1 ${isLight ? 'bg-slate-200' : 'bg-[#252C36]'}`} />
 
           <button
             onClick={onFormat}
-            className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-[#151B23]'}`}
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-colors touch-manipulation cursor-pointer ${
+              isLight ? 'hover:text-slate-900 hover:bg-slate-200/70' : 'hover:text-white hover:bg-[#151B23]'
+            }`}
             title="Format HTML (Ctrl/Cmd + Shift + F)"
+            aria-label="Format HTML code"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#7C3AED]" />
-            <span className="hidden sm:inline">Format</span>
+            <span className="hidden sm:inline font-medium">Format</span>
           </button>
 
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className={`p-1.5 rounded transition-colors ${
+            className={`p-1.5 rounded-lg transition-colors touch-manipulation cursor-pointer ${
               isSearchOpen
                 ? 'text-[#7C3AED] bg-[#7C3AED]/15'
                 : isLight
-                ? 'hover:text-slate-900 hover:bg-slate-200/60'
+                ? 'hover:text-slate-900 hover:bg-slate-200/70'
                 : 'hover:text-white hover:bg-[#151B23]'
             }`}
             title="Search & Replace (Ctrl/Cmd + F)"
+            aria-label="Search and replace"
           >
             <Search className="w-3.5 h-3.5" />
           </button>
 
           <button
             onClick={() => onUpdateSettings({ wordWrap: !settings.wordWrap })}
-            className={`p-1.5 rounded transition-colors ${
+            className={`p-1.5 rounded-lg transition-colors touch-manipulation cursor-pointer ${
               settings.wordWrap
                 ? isLight
-                  ? 'text-slate-900 bg-slate-200'
+                  ? 'text-slate-900 bg-slate-200/80'
                   : 'text-white bg-[#151B23]'
                 : isLight
-                ? 'hover:text-slate-900 hover:bg-slate-200/60'
+                ? 'hover:text-slate-900 hover:bg-slate-200/70'
                 : 'hover:text-white hover:bg-[#151B23]'
             }`}
             title={`Word Wrap: ${settings.wordWrap ? 'On' : 'Off'}`}
+            aria-label={`Toggle word wrap, currently ${settings.wordWrap ? 'on' : 'off'}`}
           >
             <WrapText className="w-3.5 h-3.5" />
           </button>
 
-          {/* Font Size Selector */}
-          <div className={`flex items-center rounded border px-1 py-0.5 text-[11px] ml-1 ${
+          {/* Font Size Stepper */}
+          <div className={`flex items-center rounded-lg border px-1 py-0.5 text-[11px] ml-0.5 ${
             isLight ? 'bg-white border-slate-200 text-slate-800' : 'bg-[#151B23] border-[#252C36]'
           }`}>
             <button
               onClick={() => onUpdateSettings({ fontSize: Math.max(11, settings.fontSize - 1) })}
-              className={`px-1 ${isLight ? 'text-slate-500 hover:text-slate-900' : 'text-[#9CA3AF] hover:text-white'}`}
+              className={`px-1 rounded hover:bg-slate-200/50 cursor-pointer ${isLight ? 'text-slate-500 hover:text-slate-900' : 'text-[#9CA3AF] hover:text-white'}`}
               title="Decrease Font Size"
+              aria-label="Decrease editor font size"
             >
               -
             </button>
             <span className={`px-1 font-mono ${isLight ? 'text-slate-800 font-semibold' : 'text-[#D1D5DB]'}`}>{settings.fontSize}px</span>
             <button
               onClick={() => onUpdateSettings({ fontSize: Math.min(22, settings.fontSize + 1) })}
-              className={`px-1 ${isLight ? 'text-slate-500 hover:text-slate-900' : 'text-[#9CA3AF] hover:text-white'}`}
+              className={`px-1 rounded hover:bg-slate-200/50 cursor-pointer ${isLight ? 'text-slate-500 hover:text-slate-900' : 'text-[#9CA3AF] hover:text-white'}`}
               title="Increase Font Size"
+              aria-label="Increase editor font size"
             >
               +
             </button>
           </div>
 
-          <div className={`h-4 w-px mx-1 ${isLight ? 'bg-slate-200' : 'bg-[#252C36]'}`} />
+          <div className={`h-4 w-px mx-0.5 sm:mx-1 ${isLight ? 'bg-slate-200' : 'bg-[#252C36]'}`} />
 
           <button
             onClick={handleCopyCurrent}
-            className={`p-1.5 rounded transition-colors ${isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-[#151B23]'}`}
+            className={`p-1.5 rounded-lg transition-colors touch-manipulation cursor-pointer ${
+              isLight ? 'hover:text-slate-900 hover:bg-slate-200/70' : 'hover:text-white hover:bg-[#151B23]'
+            }`}
             title="Copy HTML"
+            aria-label="Copy HTML code to clipboard"
           >
             <Copy className="w-3.5 h-3.5" />
           </button>
 
           <button
             onClick={handleClearCurrent}
-            className={`p-1.5 rounded hover:text-[#EF4444] transition-colors ${isLight ? 'hover:bg-slate-200/60' : 'hover:bg-[#151B23]'}`}
+            className={`p-1.5 rounded-lg hover:text-[#EF4444] transition-colors touch-manipulation cursor-pointer ${
+              isLight ? 'hover:bg-slate-200/70' : 'hover:bg-[#151B23]'
+            }`}
             title="Clear HTML"
+            aria-label="Clear all HTML code"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -617,49 +730,93 @@ export function CodeEditor({
         </div>
       )}
 
-      {/* Editor Body with Synchronized Line Numbers */}
-      <div className="flex-1 flex overflow-hidden relative font-mono-code">
+      {/* Editor Body with Synchronized Line Numbers & Syntax Highlighting */}
+      <div className="flex-1 min-h-0 flex overflow-hidden relative font-mono-code">
         {/* Line Numbers Column */}
         {settings.lineNumbers && (
           <div
             ref={lineNumbersRef}
-            style={{ fontSize: `${settings.fontSize}px`, lineHeight: 1.6 }}
-            className={`w-12 border-r text-right py-3 pr-3 pl-1 select-none overflow-hidden shrink-0 transition-colors ${
-              isLight ? 'bg-slate-50 border-slate-200 text-slate-400' : 'bg-[#0A0D12] border-r border-[#1E2530] text-[#4B5563]'
+            style={{ fontSize: `${settings.fontSize}px`, lineHeight: 1.65 }}
+            className={`w-10 sm:w-12 border-r text-right py-3 pr-2 sm:pr-3 pl-1 select-none overflow-hidden shrink-0 transition-colors ${
+              isLight ? 'bg-slate-50/80 border-slate-200 text-slate-400' : 'bg-[#0A0D12] border-r border-[#1E2530] text-[#4B5563]'
             }`}
           >
-            {lineNumbers.map((num) => (
-              <div key={num} className="leading-relaxed">
-                {num}
-              </div>
-            ))}
+            {lineNumbers.map((num) => {
+              const isActive = num === activeLine;
+              return (
+                <div
+                  key={num}
+                  className={`leading-[1.65] font-mono text-[11px] sm:text-xs transition-colors ${
+                    isActive
+                      ? isLight
+                        ? 'text-[#7C3AED] font-bold'
+                        : 'text-[#A78BFA] font-bold'
+                      : ''
+                  }`}
+                >
+                  {num}
+                </div>
+              );
+            })}
           </div>
         )}
 
-        {/* Text Area */}
-        <textarea
-          ref={textareaRef}
-          value={currentCode}
-          onChange={(e) => setCode(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onScroll={handleScroll}
-          spellCheck={false}
-          autoCapitalize="off"
-          autoComplete="off"
-          autoCorrect="off"
-          style={{
-            fontSize: `${settings.fontSize}px`,
-            lineHeight: 1.6,
-            whiteSpace: settings.wordWrap ? 'pre-wrap' : 'pre',
-            tabSize: settings.tabSize || 2,
-          }}
-          className={`flex-1 w-full h-full p-3 resize-none outline-none border-none font-mono-code overflow-auto select-text transition-colors ${
-            isLight
-              ? 'bg-white text-slate-900 selection:bg-purple-100 placeholder:text-slate-400'
-              : 'bg-[#0D1117] text-[#E6EDF3] selection:bg-[#7C3AED]/40 placeholder:text-slate-600'
-          }`}
-          placeholder="<!-- Write or paste your HTML code here -->"
-        />
+        {/* Code Canvas Container */}
+        <div className="flex-1 min-h-0 relative h-full w-full overflow-hidden">
+          {/* Syntax Highlighted Pre (Behind textarea) */}
+          {settings.syntaxHighlighting !== false && currentCode.length > 0 && (
+            <pre
+              ref={preRef}
+              aria-hidden="true"
+              style={{
+                fontSize: `${settings.fontSize}px`,
+                lineHeight: 1.65,
+                whiteSpace: settings.wordWrap ? 'pre-wrap' : 'pre',
+                wordBreak: settings.wordWrap ? 'break-word' : 'normal',
+                tabSize: settings.tabSize || 2,
+              }}
+              className="absolute inset-0 w-full h-full p-3 font-mono-code overflow-hidden pointer-events-none select-none m-0 border-0 box-border"
+              dangerouslySetInnerHTML={{ __html: highlightedCodeHtml + (currentCode.endsWith('\n') ? ' ' : '') }}
+            />
+          )}
+
+          {/* Interactive Native Text Area */}
+          <textarea
+            ref={textareaRef}
+            value={currentCode}
+            onChange={(e) => {
+              setCode(e.target.value);
+              setTimeout(updateActiveLine, 0);
+            }}
+            onKeyDown={(e) => {
+              handleKeyDown(e);
+              setTimeout(updateActiveLine, 0);
+            }}
+            onKeyUp={updateActiveLine}
+            onClick={updateActiveLine}
+            onSelect={updateActiveLine}
+            onScroll={handleScroll}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoComplete="off"
+            autoCorrect="off"
+            style={{
+              fontSize: `${settings.fontSize}px`,
+              lineHeight: 1.65,
+              whiteSpace: settings.wordWrap ? 'pre-wrap' : 'pre',
+              wordBreak: settings.wordWrap ? 'break-word' : 'normal',
+              tabSize: settings.tabSize || 2,
+              color: settings.syntaxHighlighting !== false && currentCode.length > 0 ? 'transparent' : undefined,
+              caretColor: isLight ? '#7C3AED' : '#A78BFA',
+            }}
+            className={`absolute inset-0 w-full h-full p-3 resize-none outline-none border-none font-mono-code overflow-auto select-text transition-colors bg-transparent ${
+              isLight
+                ? 'selection:bg-[#7C3AED]/20 placeholder:text-slate-400 placeholder:italic'
+                : 'text-[#E6EDF3] selection:bg-[#7C3AED]/40 placeholder:text-slate-500 placeholder:italic'
+            }`}
+            placeholder="<!-- Write or paste your HTML code here -->"
+          />
+        </div>
       </div>
 
       {/* Footer Status Bar */}

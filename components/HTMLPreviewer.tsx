@@ -462,6 +462,17 @@ export default function HTMLPreviewer() {
 
   const isLight = theme === 'light';
 
+  const handleViewModeChange = (mode: 'split' | 'editor' | 'preview') => {
+    setViewMode(mode);
+    if (!isDesktop) {
+      if (mode === 'preview') {
+        setMobileTab('preview');
+      } else if (mode === 'editor') {
+        setMobileTab('code');
+      }
+    }
+  };
+
   return (
     <div
       id="editor"
@@ -495,19 +506,25 @@ export default function HTMLPreviewer() {
         onDownloadHtml={() => handleDownload(project)}
         onImportHtml={triggerFileInput}
         viewMode={viewMode}
-        onChangeViewMode={setViewMode}
+        onChangeViewMode={handleViewModeChange}
       />
 
       {/* Mobile CODE / PREVIEW Tab Bar (Visible on mobile < 768px) */}
-      <div className={`md:hidden flex items-center border-b px-3 py-1.5 shrink-0 transition-colors ${
+      <div className={`md:hidden flex items-center border-b px-3 py-1.5 shrink-0 select-none transition-colors ${
         isLight ? 'bg-white border-slate-200' : 'bg-[#11161D] border-[#252C36]'
       }`}>
-        <div className={`flex w-full p-0.5 rounded-lg border transition-colors ${
-          isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#151B23] border-[#252C36]'
-        }`}>
+        <div
+          role="tablist"
+          aria-label="Workspace View"
+          className={`flex w-full p-1 rounded-xl border transition-colors ${
+            isLight ? 'bg-slate-100 border-slate-200' : 'bg-[#151B23] border-[#252C36]'
+          }`}
+        >
           <button
+            role="tab"
+            aria-selected={mobileTab === 'code'}
             onClick={() => setMobileTab('code')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all touch-manipulation cursor-pointer ${
               mobileTab === 'code'
                 ? 'bg-[#7C3AED] text-white shadow-xs'
                 : isLight
@@ -519,8 +536,10 @@ export default function HTMLPreviewer() {
             <span>CODE</span>
           </button>
           <button
+            role="tab"
+            aria-selected={mobileTab === 'preview'}
             onClick={() => setMobileTab('preview')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all touch-manipulation cursor-pointer ${
               mobileTab === 'preview'
                 ? 'bg-[#7C3AED] text-white shadow-xs'
                 : isLight
@@ -536,10 +555,10 @@ export default function HTMLPreviewer() {
 
       {/* Main Workspace */}
       <div ref={workspaceRef} className="flex-1 min-h-0 flex overflow-hidden relative w-full h-full">
-        {/* MOBILE VIEW (< 768px) */}
+        {/* MOBILE VIEW (< 768px): Both kept mounted so editor cursor, scroll, and undo history are never lost */}
         {!isDesktop ? (
-          mobileTab === 'code' ? (
-            <div className="w-full h-full flex flex-col flex-1 min-h-0 overflow-hidden">
+          <div className="w-full h-full flex flex-col flex-1 min-h-0 overflow-hidden relative">
+            <div className={`w-full h-full flex-col flex-1 min-h-0 overflow-hidden ${mobileTab === 'code' ? 'flex' : 'hidden'}`}>
               <CodeEditor
                 theme={theme}
                 html={project.html}
@@ -552,8 +571,7 @@ export default function HTMLPreviewer() {
                 onImportHtmlFile={handleImportFile}
               />
             </div>
-          ) : (
-            <div className="w-full h-full flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className={`w-full h-full flex-col flex-1 min-h-0 overflow-hidden ${mobileTab === 'preview' ? 'flex' : 'hidden'}`}>
               <PreviewPanel
                 theme={theme}
                 html={project.html}
@@ -569,7 +587,7 @@ export default function HTMLPreviewer() {
                 onToggleExpand={() => setMobileTab('code')}
               />
             </div>
-          )
+          </div>
         ) : (
           /* DESKTOP / TABLET VIEW (>= 768px) */
           <>

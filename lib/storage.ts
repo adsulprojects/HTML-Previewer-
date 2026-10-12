@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: EditorSettings = {
   tabSize: 2,
   wordWrap: true,
   lineNumbers: true,
+  syntaxHighlighting: true,
   autoRun: true,
   autoRunDelay: 400,
   theme: 'dark',

@@ -131,6 +131,75 @@ export function createSandboxDocument(html: string, css: string = '', js: string
     ? `\n  <script id="preview-user-script">\n    try {\n      ${js}\n    } catch(err) {\n      console.error(err.message || String(err));\n    }\n  </script>`
     : '';
 
+  // Graceful handling of empty input
+  if (!html.trim() && !css.trim() && !js.trim()) {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Preview</title>
+  ${consoleInterceptor}
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #F8FAFC;
+      color: #64748B;
+      text-align: center;
+      padding: 24px;
+    }
+    .preview-card {
+      max-width: 360px;
+      padding: 28px 20px;
+      border-radius: 16px;
+      background: #FFFFFF;
+      border: 1px dashed #CBD5E1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .preview-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #EDE9FE;
+      color: #7C3AED;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    h2 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+    p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #64748B;
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-card">
+    <div class="preview-icon">&lt;/&gt;</div>
+    <h2>Live Preview Canvas</h2>
+    <p>Type or paste your HTML in the editor to see your website render here in real time.</p>
+  </div>
+</body>
+</html>`;
+  }
+
   const hasDocType = /<!DOCTYPE\s+html/i.test(html);
   const hasHtml = /<html[^>]*>/i.test(html);
   const hasHead = /<head[^>]*>/i.test(html);

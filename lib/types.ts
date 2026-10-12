@@ -25,6 +25,7 @@ export interface EditorSettings {
   tabSize: number;
   wordWrap: boolean;
   lineNumbers: boolean;
+  syntaxHighlighting?: boolean;
   autoRun: boolean;
   autoRunDelay: number; // ms
   theme: 'dark' | 'light';

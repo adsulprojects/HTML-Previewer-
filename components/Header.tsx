@@ -68,27 +68,27 @@ export function Header({
 
   return (
     <header className={`${isLight ? 'bg-white/95 border-b border-slate-200/90 text-slate-900' : 'bg-[#11161D]/95 border-b border-[#252C36] text-[#F5F7FA]'} backdrop-blur-md select-none sticky top-0 z-40 w-full transition-colors font-[var(--font-manrope)]`}>
-      <div className="w-full px-3.5 sm:px-6 h-16 sm:h-[68px] flex items-center justify-between gap-3 sm:gap-4">
+      <div className="w-full px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2.5 sm:gap-4">
         {/* Logo and Tagline */}
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             <div className="relative group">
               <Image
                 src="/logo.png"
                 alt="HTML Previewer Logo"
-                width={40}
-                height={40}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-contain shadow-sm bg-[#0B0F14] border border-[#252C36] shrink-0 transition-transform duration-200 group-hover:scale-105"
+                width={36}
+                height={36}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-contain shadow-sm bg-[#0B0F14] border border-[#252C36] shrink-0 transition-transform duration-200 group-hover:scale-105"
                 referrerPolicy="no-referrer"
                 priority
               />
             </div>
             <div className="flex flex-col justify-center">
               <div className="flex items-baseline">
-                <span className={`font-extrabold text-[15px] sm:text-lg tracking-tight font-[var(--font-manrope)] leading-none ${isLight ? 'text-slate-900' : 'text-[#F5F7FA]'}`}>
+                <span className={`font-extrabold text-[15px] sm:text-base md:text-lg tracking-tight font-[var(--font-manrope)] leading-none ${isLight ? 'text-slate-900' : 'text-[#F5F7FA]'}`}>
                   <span>HTML</span> <span className="text-[#A78BFA]">Previewer</span>
                 </span>
-                <span className={`hidden xl:inline-block ml-2.5 text-xs font-normal tracking-normal ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>
+                <span className={`hidden xl:inline-block ml-2 text-xs font-normal tracking-normal ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>
                   Write code. Preview instantly.
                 </span>
               </div>
@@ -223,10 +223,10 @@ export function Header({
 
           <div className={`h-5 w-px mx-0.5 hidden sm:block ${isLight ? 'bg-slate-200' : 'bg-[#252C36]'}`} />
 
-          {/* Theme Toggle Button */}
+          {/* Theme Toggle Button (sm+) */}
           <button
             onClick={onToggleTheme}
-            className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center border ${
+            className={`hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-xl transition-all items-center justify-center border ${
               isLight
                 ? 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300'
                 : 'bg-[#151B23] border-[#252C36] text-[#CBD5E1] hover:text-white hover:bg-[#1C232E] hover:border-[#333B47]'
@@ -241,10 +241,10 @@ export function Header({
             )}
           </button>
 
-          {/* Settings */}
+          {/* Settings (sm+) */}
           <button
             onClick={onOpenSettings}
-            className={`w-10 h-10 rounded-xl transition-all flex items-center justify-center border ${
+            className={`hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-xl transition-all items-center justify-center border ${
               isLight
                 ? 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300'
                 : 'bg-[#151B23] border-[#252C36] text-[#CBD5E1] hover:text-white hover:bg-[#1C232E] hover:border-[#333B47]'
@@ -258,7 +258,7 @@ export function Header({
           {/* Fullscreen */}
           <button
             onClick={toggleBrowserFullscreen}
-            className={`hidden sm:flex w-10 h-10 rounded-xl transition-all items-center justify-center border ${
+            className={`hidden sm:flex w-9 h-9 sm:w-10 sm:h-10 rounded-xl transition-all items-center justify-center border ${
               isLight
                 ? 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 hover:border-slate-300'
                 : 'bg-[#151B23] border-[#252C36] text-[#CBD5E1] hover:text-white hover:bg-[#1C232E] hover:border-[#333B47]'
@@ -273,7 +273,7 @@ export function Header({
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`md:hidden relative w-11 h-11 flex flex-col items-center justify-center rounded-xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] ${
+            className={`md:hidden relative w-10 h-10 sm:w-11 sm:h-11 flex flex-col items-center justify-center rounded-xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] ${
               isLight
                 ? isMobileMenuOpen
                   ? 'bg-slate-100 border-[#7C3AED]/40 text-slate-900 shadow-xs'

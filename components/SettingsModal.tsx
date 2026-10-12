@@ -143,10 +143,32 @@ export function SettingsModal({
                 className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
                   settings.lineNumbers ? 'bg-[#7C3AED]' : isLight ? 'bg-slate-300' : 'bg-[#252C36]'
                 }`}
+                aria-label="Toggle line numbers"
               >
                 <div
                   className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
                     settings.lineNumbers ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Syntax Highlighting */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`font-semibold ${isLight ? 'text-slate-900' : 'text-white'}`}>HTML Syntax Highlighting</p>
+                <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>Colorize HTML tags, attributes, and strings</p>
+              </div>
+              <button
+                onClick={() => onUpdateSettings({ syntaxHighlighting: !(settings.syntaxHighlighting ?? true) })}
+                className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors ${
+                  (settings.syntaxHighlighting ?? true) ? 'bg-[#7C3AED]' : isLight ? 'bg-slate-300' : 'bg-[#252C36]'
+                }`}
+                aria-label="Toggle syntax highlighting"
+              >
+                <div
+                  className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                    (settings.syntaxHighlighting ?? true) ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
               </button>
