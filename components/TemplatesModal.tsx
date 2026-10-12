@@ -44,7 +44,7 @@ export function TemplatesModal({ theme = 'dark', isOpen, onClose, onSelectTempla
             </div>
             <div>
               <h2 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-[#F5F7FA]'}`}>Starter Templates</h2>
-              <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>Choose a boilerplate with complete HTML, CSS, and JavaScript</p>
+              <p className={`text-xs ${isLight ? 'text-slate-500' : 'text-[#9CA3AF]'}`}>Choose an HTML starter or boilerplate template</p>
             </div>
           </div>
           <button
@@ -97,7 +97,7 @@ export function TemplatesModal({ theme = 'dark', isOpen, onClose, onSelectTempla
                     {template.category}
                   </span>
                   <span className={`text-[11px] font-mono ${isLight ? 'text-slate-400' : 'text-[#6B7280]'}`}>
-                    {template.html.split('\n').length + template.css.split('\n').length + template.js.split('\n').length} lines
+                    {template.html ? template.html.split('\n').length : 0} lines
                   </span>
                 </div>
                 <h3 className={`text-base font-bold transition-colors mb-1 ${

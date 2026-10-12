@@ -17,8 +17,7 @@ import {
   FolderKanban,
   Columns,
   Square,
-  Sparkles,
-  BookOpen
+  Sparkles
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -187,19 +186,6 @@ export function Header({
             <Keyboard className="w-4 h-4 text-[#38BDF8]" />
             <span>Shortcuts</span>
           </button>
-
-          <a
-            href="#guide"
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs sm:text-[13px] font-semibold transition-colors ${
-              isLight
-                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                : 'text-[#CBD5E1] hover:text-white hover:bg-[#151B23]'
-            }`}
-            title="HTML Previewer Guide & FAQ"
-          >
-            <BookOpen className="w-4 h-4 text-emerald-400" />
-            <span>Guide</span>
-          </a>
         </nav>
 
         {/* Right Controls */}
@@ -453,17 +439,6 @@ export function Header({
               <SettingsIcon className="w-4 h-4 text-emerald-500 shrink-0" />
               <span>Settings</span>
             </button>
-
-            <a
-              href="#guide"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center justify-center gap-2.5 p-3 rounded-xl font-medium border col-span-2 min-h-[44px] transition-colors ${
-                isLight ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100' : 'bg-[#151B23] text-white border-[#252C36] hover:bg-[#1E2530]'
-              }`}
-            >
-              <BookOpen className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Guide &amp; Documentation</span>
-            </a>
           </div>
 
           {/* Theme Quick Toggle in Mobile Drawer */}

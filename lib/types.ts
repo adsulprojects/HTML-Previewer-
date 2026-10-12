@@ -29,6 +29,8 @@ export interface EditorSettings {
   autoRunDelay: number; // ms
   theme: 'dark' | 'light';
   compactMode: boolean;
+  admobTestId: string;
+  showTestAds: boolean;
 }
 
 export interface Template {

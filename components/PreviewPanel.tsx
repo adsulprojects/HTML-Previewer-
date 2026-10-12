@@ -23,8 +23,8 @@ import {
 interface PreviewPanelProps {
   theme?: 'dark' | 'light';
   html: string;
-  css: string;
-  js: string;
+  css?: string;
+  js?: string;
   autoRun: boolean;
   autoRunDelay: number;
   onToggleAutoRun: () => void;
@@ -38,8 +38,8 @@ interface PreviewPanelProps {
 export function PreviewPanel({
   theme = 'dark',
   html,
-  css,
-  js,
+  css = '',
+  js = '',
   autoRun,
   autoRunDelay,
   onToggleAutoRun,

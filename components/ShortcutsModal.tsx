@@ -18,7 +18,7 @@ export function ShortcutsModal({ theme = 'dark', isOpen, onClose }: ShortcutsMod
     { key: 'Ctrl / ⌘ + Enter', action: 'Run / Refresh Sandbox Preview' },
     { key: 'Ctrl / ⌘ + S', action: 'Save Current Project' },
     { key: 'Ctrl / ⌘ + F', action: 'Toggle Search & Replace' },
-    { key: 'Ctrl / ⌘ + Shift + F', action: 'Format Active Code (HTML/CSS/JS)' },
+    { key: 'Ctrl / ⌘ + Shift + F', action: 'Format HTML Code' },
     { key: 'Ctrl / ⌘ + Z', action: 'Undo last code change' },
     { key: 'Ctrl / ⌘ + Shift + Z', action: 'Redo code change' },
     { key: 'Tab', action: 'Indent lines by spaces' },

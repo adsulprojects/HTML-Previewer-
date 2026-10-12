@@ -216,10 +216,7 @@ export function ProjectsModal({
                         </span>
                         <span>·</span>
                         <span>
-                          {project.html.split('\n').length +
-                            project.css.split('\n').length +
-                            project.js.split('\n').length}{' '}
-                          lines
+                          {project.html ? project.html.split('\n').length : 0} lines
                         </span>
                       </div>
                     </div>

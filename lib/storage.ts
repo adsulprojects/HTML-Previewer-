@@ -17,14 +17,16 @@ export const DEFAULT_SETTINGS: EditorSettings = {
   autoRunDelay: 400,
   theme: 'dark',
   compactMode: false,
+  admobTestId: 'ca-app-pub-3940256099942544/9257395921',
+  showTestAds: true,
 };
 
 export const INITIAL_PROJECT: Project = {
   id: 'default-project',
-  name: 'Interactive Starter',
-  html: TEMPLATES[0].html,
-  css: TEMPLATES[0].css,
-  js: TEMPLATES[0].js,
+  name: 'New Project',
+  html: '',
+  css: '',
+  js: '',
   createdAt: 1728200000000,
   updatedAt: 1728200000000,
 };
@@ -35,10 +37,19 @@ export function loadCurrentProject(): Project {
     const raw = localStorage.getItem(STORAGE_KEYS.CURRENT_PROJECT);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed.id === 'default-project') {
+      // If it's the old default starter or contains the pre-existing dummy code, reset to empty
+      if (
+        parsed.id === 'default-project' ||
+        parsed.name === 'Interactive Starter' ||
+        (typeof parsed.html === 'string' && parsed.html.includes('Modern Full-Page Responsive Website'))
+      ) {
         return INITIAL_PROJECT;
       }
-      return parsed;
+      return {
+        ...parsed,
+        css: '',
+        js: '',
+      };
     }
   } catch (err) {
     console.error('Failed to load current project from localStorage:', err);
@@ -62,7 +73,18 @@ export function loadProjectList(): Project[] {
     if (raw) {
       const list = JSON.parse(raw);
       if (Array.isArray(list) && list.length > 0) {
-        return list;
+        // Strip pre-existing dummy projects
+        const cleaned = list.map((p: Project) => {
+          if (
+            p.id === 'default-project' ||
+            p.name === 'Interactive Starter' ||
+            (typeof p.html === 'string' && p.html.includes('Modern Full-Page Responsive Website'))
+          ) {
+            return INITIAL_PROJECT;
+          }
+          return { ...p, css: '', js: '' };
+        });
+        return cleaned;
       }
     }
   } catch (err) {
@@ -85,7 +107,12 @@ export function loadSettings(): EditorSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     if (raw) {
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+      const parsed = JSON.parse(raw);
+      const merged = { ...DEFAULT_SETTINGS, ...parsed };
+      if (!merged.admobTestId || merged.admobTestId === 'ca-app-pub-3940256099942544/6300978111') {
+        merged.admobTestId = 'ca-app-pub-3940256099942544/9257395921';
+      }
+      return merged;
     }
   } catch (err) {
     console.error('Failed to load settings:', err);

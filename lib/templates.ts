@@ -3,6 +3,16 @@ import { Template } from './types';
 export const TEMPLATES: Template[] = [
   {
     id: 'blank',
+    name: 'Blank HTML',
+    description: 'Clean blank HTML template ready for your custom code',
+    category: 'Starter',
+    html: '',
+    css: '',
+    js: '',
+  },
+  /* Starter templates */
+  {
+    id: 'starter-page',
     name: 'Full-Page Starter',
     description: 'Modern full-page responsive website with navbar, hero, live interactive controls, and feature grid',
     category: 'Starter',

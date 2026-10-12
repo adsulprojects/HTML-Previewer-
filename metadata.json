@@ -1,6 +1,6 @@
 {
   "name": "HTML Previewer",
-  "description": "Write code. Preview instantly. A standalone professional web-based HTML, CSS, and JavaScript playground with live sandboxed preview, device modes, and developer console.",
+  "description": "Write code. Preview instantly. A standalone professional web-based HTML playground with live sandboxed preview, device modes, and developer console.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

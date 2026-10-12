@@ -59,40 +59,28 @@ export function bundleCode(
     return result;
   }
 
-  // Construct full HTML5 document
+  // Construct full HTML5 document without dummy styles or script comments
+  const styleBlock = css.trim() ? `\n  <style>\n${css.trim()}\n  </style>` : '';
+  const scriptBlock = js.trim() ? `\n  <script>\n${js.trim()}\n  </script>` : '';
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
-  <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-    html, body {
-      width: 100%;
-      min-height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-${css.trim() ? css : '/* Add styles here */'}
-  </style>
+  <title>${title}</title>${styleBlock}
 </head>
 <body>
 ${html.trim()}
-
-  <script>
-${js.trim() ? js : '// JavaScript code'}
-  </script>
+${scriptBlock}
 </body>
-</html>`;
+</html>`.trim();
 }
 
 /**
  * Creates sandbox document with interceptor for console and uncaught errors
  */
-export function createSandboxDocument(html: string, css: string, js: string): string {
+export function createSandboxDocument(html: string, css: string = '', js: string = ''): string {
   const consoleInterceptor = `
   <script>
     (function() {
@@ -139,14 +127,9 @@ export function createSandboxDocument(html: string, css: string, js: string): st
 
   const userStylesTag = css.trim() ? `<style id="preview-user-styles">\n${css}\n</style>` : '';
 
-  const userScriptTag = `
-  <script id="preview-user-script">
-    try {
-      ${js}
-    } catch(err) {
-      console.error(err.message || String(err));
-    }
-  </script>`;
+  const userScriptTag = js.trim()
+    ? `\n  <script id="preview-user-script">\n    try {\n      ${js}\n    } catch(err) {\n      console.error(err.message || String(err));\n    }\n  </script>`
+    : '';
 
   const hasDocType = /<!DOCTYPE\s+html/i.test(html);
   const hasHtml = /<html[^>]*>/i.test(html);

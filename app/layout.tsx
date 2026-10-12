@@ -18,9 +18,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://html-previewer-steel.vercel.app'),
-  title: 'Free Online HTML Previewer – Live HTML, CSS & JS Preview',
+  title: 'Free Online HTML Previewer – Live HTML Sandbox Preview',
   description:
-    'Free online HTML previewer and sandbox. Write, test, and preview HTML, CSS, and JavaScript in real time with an instant sandboxed iframe, responsive viewports, and developer console.',
+    'Free online HTML previewer and sandbox. Write, test, and preview HTML in real time with an instant sandboxed iframe, responsive viewports, and developer console.',
   alternates: {
     canonical: 'https://html-previewer-steel.vercel.app/',
   },
@@ -36,9 +36,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Free Online HTML Previewer – Live HTML, CSS & JS Preview',
+    title: 'Free Online HTML Previewer – Live HTML Sandbox Preview',
     description:
-      'Free online HTML previewer and sandbox. Write, test, and preview HTML, CSS, and JavaScript in real time with an instant sandboxed iframe, responsive viewports, and developer console.',
+      'Free online HTML previewer and sandbox. Write, test, and preview HTML in real time with an instant sandboxed iframe, responsive viewports, and developer console.',
     url: 'https://html-previewer-steel.vercel.app/',
     siteName: 'HTML Previewer',
     locale: 'en_US',
@@ -46,9 +46,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free Online HTML Previewer – Live HTML, CSS & JS Preview',
+    title: 'Free Online HTML Previewer – Live HTML Sandbox Preview',
     description:
-      'Free online HTML previewer and sandbox. Write, test, and preview HTML, CSS, and JavaScript in real time with an instant sandboxed iframe, responsive viewports, and developer console.',
+      'Free online HTML previewer and sandbox. Write, test, and preview HTML in real time with an instant sandboxed iframe, responsive viewports, and developer console.',
   },
   icons: {
     icon: '/logo.png',

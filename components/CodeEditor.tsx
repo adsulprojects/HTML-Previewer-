@@ -23,38 +23,27 @@ import {
 
 interface CodeEditorProps {
   theme?: 'dark' | 'light';
-  activeTab: Language;
-  onTabChange: (tab: Language) => void;
   html: string;
-  css: string;
-  js: string;
   onChangeHtml: (val: string) => void;
-  onChangeCss: (val: string) => void;
-  onChangeJs: (val: string) => void;
   settings: EditorSettings;
   onUpdateSettings: (settings: Partial<EditorSettings>) => void;
   onFormat: () => void;
-  onCopyAll: () => void;
+  onCopyAll?: () => void;
   onShowToast: (text: string, type?: 'success' | 'info' | 'warning' | 'error') => void;
   onImportHtmlFile: (file: File) => void;
-}
-
-interface HistoryState {
-  html: string;
-  css: string;
-  js: string;
+  // Kept for backward compatibility
+  activeTab?: Language;
+  onTabChange?: (tab: Language) => void;
+  css?: string;
+  js?: string;
+  onChangeCss?: (val: string) => void;
+  onChangeJs?: (val: string) => void;
 }
 
 export function CodeEditor({
   theme,
-  activeTab,
-  onTabChange,
   html,
-  css,
-  js,
   onChangeHtml,
-  onChangeCss,
-  onChangeJs,
   settings,
   onUpdateSettings,
   onFormat,
@@ -64,8 +53,8 @@ export function CodeEditor({
 }: CodeEditorProps) {
   const currentTheme = theme || settings.theme || 'dark';
   const isLight = currentTheme === 'light';
-  // Undo/Redo history stack
-  const historyRef = useRef<HistoryState[]>([{ html, css, js }]);
+  // Undo/Redo history stack for HTML
+  const historyRef = useRef<string[]>([html]);
   const historyIndexRef = useRef<number>(0);
   const isUndoRedoAction = useRef<boolean>(false);
 
@@ -82,15 +71,13 @@ export function CodeEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
 
-  // Current code value for active tab
-  const currentCode = activeTab === 'html' ? html : activeTab === 'css' ? css : js;
+  // Current code value is strictly HTML
+  const currentCode = html;
   const setCode = useCallback(
     (newVal: string) => {
-      if (activeTab === 'html') onChangeHtml(newVal);
-      else if (activeTab === 'css') onChangeCss(newVal);
-      else onChangeJs(newVal);
+      onChangeHtml(newVal);
     },
-    [activeTab, onChangeHtml, onChangeCss, onChangeJs]
+    [onChangeHtml]
   );
 
   // Record undo history (debounced)
@@ -101,18 +88,12 @@ export function CodeEditor({
     }
 
     const timer = setTimeout(() => {
-      const currentSnapshot = { html, css, js };
       const lastSnapshot = historyRef.current[historyIndexRef.current];
 
-      if (
-        !lastSnapshot ||
-        lastSnapshot.html !== html ||
-        lastSnapshot.css !== css ||
-        lastSnapshot.js !== js
-      ) {
+      if (lastSnapshot !== html) {
         // Truncate any redo branch
         const newHistory = historyRef.current.slice(0, historyIndexRef.current + 1);
-        newHistory.push(currentSnapshot);
+        newHistory.push(html);
         if (newHistory.length > 50) newHistory.shift(); // Max 50 states
         historyRef.current = newHistory;
         historyIndexRef.current = newHistory.length - 1;
@@ -120,17 +101,15 @@ export function CodeEditor({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [html, css, js]);
+  }, [html]);
 
   // Undo Handler
   const handleUndo = () => {
     if (historyIndexRef.current > 0) {
       historyIndexRef.current--;
-      const prevState = historyRef.current[historyIndexRef.current];
+      const prevCode = historyRef.current[historyIndexRef.current];
       isUndoRedoAction.current = true;
-      onChangeHtml(prevState.html);
-      onChangeCss(prevState.css);
-      onChangeJs(prevState.js);
+      onChangeHtml(prevCode);
       onShowToast('Undo', 'info');
     }
   };
@@ -139,26 +118,25 @@ export function CodeEditor({
   const handleRedo = () => {
     if (historyIndexRef.current < historyRef.current.length - 1) {
       historyIndexRef.current++;
-      const nextState = historyRef.current[historyIndexRef.current];
+      const nextCode = historyRef.current[historyIndexRef.current];
       isUndoRedoAction.current = true;
-      onChangeHtml(nextState.html);
-      onChangeCss(nextState.css);
-      onChangeJs(nextState.js);
+      onChangeHtml(nextCode);
       onShowToast('Redo', 'info');
     }
   };
 
   // Copy Active Code
   const handleCopyCurrent = () => {
-    navigator.clipboard.writeText(currentCode);
-    onShowToast(`Copied ${activeTab.toUpperCase()} to clipboard`, 'success');
+    navigator.clipboard.writeText(html);
+    onShowToast('Copied HTML to clipboard', 'success');
   };
 
   // Clear Active Code
   const handleClearCurrent = () => {
-    if (confirm(`Clear all ${activeTab.toUpperCase()} code?`)) {
-      setCode('');
-      onShowToast(`Cleared ${activeTab.toUpperCase()} code`, 'info');
+    if (!html.trim()) return;
+    if (confirm('Clear all HTML code?')) {
+      onChangeHtml('');
+      onShowToast('Cleared HTML code', 'info');
     }
   };
 
@@ -429,64 +407,21 @@ export function CodeEditor({
       <div className={`flex flex-wrap items-center justify-between gap-1 px-3 py-1.5 border-b text-xs transition-colors ${
         isLight ? 'bg-slate-50 border-slate-200' : 'bg-[#11161D] border-[#252C36]'
       }`}>
-        {/* Language Tabs */}
+        {/* HTML Editor Badge */}
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => onTabChange('html')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs transition-colors ${
-              activeTab === 'html'
-                ? isLight
-                  ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
-                  : 'bg-[#151B23] text-[#F5F7FA] border border-[#252C36] shadow-sm'
-                : isLight
-                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-                : 'text-[#9CA3AF] hover:text-[#F5F7FA] hover:bg-[#151B23]/50'
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs select-none transition-colors ${
+              isLight
+                ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
+                : 'bg-[#151B23] text-[#F5F7FA] border border-[#252C36] shadow-sm'
             }`}
           >
             <Code2 className="w-3.5 h-3.5 text-[#F97316]" />
             <span>HTML</span>
             <span className={`text-[10px] font-mono ml-0.5 ${isLight ? 'text-slate-400' : 'text-[#6B7280]'}`}>
-              ({html.split('\n').length})
+              ({linesCount} lines)
             </span>
-          </button>
-
-          <button
-            onClick={() => onTabChange('css')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs transition-colors ${
-              activeTab === 'css'
-                ? isLight
-                  ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
-                  : 'bg-[#151B23] text-[#F5F7FA] border border-[#252C36] shadow-sm'
-                : isLight
-                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-                : 'text-[#9CA3AF] hover:text-[#F5F7FA] hover:bg-[#151B23]/50'
-            }`}
-          >
-            <FileType className="w-3.5 h-3.5 text-[#38BDF8]" />
-            <span>CSS</span>
-            <span className={`text-[10px] font-mono ml-0.5 ${isLight ? 'text-slate-400' : 'text-[#6B7280]'}`}>
-              ({css.split('\n').length})
-            </span>
-          </button>
-
-          <button
-            onClick={() => onTabChange('js')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs transition-colors ${
-              activeTab === 'js'
-                ? isLight
-                  ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
-                  : 'bg-[#151B23] text-[#F5F7FA] border border-[#252C36] shadow-sm'
-                : isLight
-                ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-                : 'text-[#9CA3AF] hover:text-[#F5F7FA] hover:bg-[#151B23]/50'
-            }`}
-          >
-            <FileCode className="w-3.5 h-3.5 text-[#FACC15]" />
-            <span>JS</span>
-            <span className={`text-[10px] font-mono ml-0.5 ${isLight ? 'text-slate-400' : 'text-[#6B7280]'}`}>
-              ({js.split('\n').length})
-            </span>
-          </button>
+          </div>
         </div>
 
         {/* Action Controls Toolbar */}
@@ -512,7 +447,7 @@ export function CodeEditor({
           <button
             onClick={onFormat}
             className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-[#151B23]'}`}
-            title="Format Code (Ctrl/Cmd + Shift + F)"
+            title="Format HTML (Ctrl/Cmd + Shift + F)"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#7C3AED]" />
             <span className="hidden sm:inline">Format</span>
@@ -574,7 +509,7 @@ export function CodeEditor({
           <button
             onClick={handleCopyCurrent}
             className={`p-1.5 rounded transition-colors ${isLight ? 'hover:text-slate-900 hover:bg-slate-200/60' : 'hover:text-white hover:bg-[#151B23]'}`}
-            title={`Copy ${activeTab.toUpperCase()}`}
+            title="Copy HTML"
           >
             <Copy className="w-3.5 h-3.5" />
           </button>
@@ -582,7 +517,7 @@ export function CodeEditor({
           <button
             onClick={handleClearCurrent}
             className={`p-1.5 rounded hover:text-[#EF4444] transition-colors ${isLight ? 'hover:bg-slate-200/60' : 'hover:bg-[#151B23]'}`}
-            title={`Clear ${activeTab.toUpperCase()}`}
+            title="Clear HTML"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -723,7 +658,7 @@ export function CodeEditor({
               ? 'bg-white text-slate-900 selection:bg-purple-100 placeholder:text-slate-400'
               : 'bg-[#0D1117] text-[#E6EDF3] selection:bg-[#7C3AED]/40 placeholder:text-slate-600'
           }`}
-          placeholder={`Enter your ${activeTab.toUpperCase()} code here...`}
+          placeholder="<!-- Write or paste your HTML code here -->"
         />
       </div>
 
@@ -732,7 +667,7 @@ export function CodeEditor({
         isLight ? 'bg-slate-50 border-slate-200 text-slate-500' : 'bg-[#11161D] border-[#252C36] text-[#6B7280]'
       }`}>
         <div className="flex items-center gap-3">
-          <span className="font-semibold">{activeTab.toUpperCase()}</span>
+          <span className="font-semibold text-[#F97316]">HTML</span>
           <span>{linesCount} lines</span>
           <span>{currentCode.length} chars</span>
         </div>

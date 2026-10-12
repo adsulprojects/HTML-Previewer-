@@ -10,7 +10,6 @@ import { SettingsModal } from '@/components/SettingsModal';
 import { ProjectsModal } from '@/components/ProjectsModal';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { ToastContainer } from '@/components/Toast';
-import { EmptyState } from '@/components/EmptyState';
 
 import {
   Language,
@@ -34,12 +33,11 @@ import {
   bundleCode,
   extractCode,
   formatHTML,
-  formatCSS,
-  formatJS,
   downloadFile,
 } from '@/lib/formatters';
 import { TEMPLATES } from '@/lib/templates';
 import { Code, Eye, GripVertical } from 'lucide-react';
+import { TestAdBanner } from '@/components/TestAdBanner';
 
 export default function HTMLPreviewer() {
   // Active Project & Code
@@ -212,39 +210,24 @@ export default function HTMLPreviewer() {
   // Code formatting
   const handleFormat = () => {
     try {
-      if (activeTab === 'html') {
-        const formatted = formatHTML(project.html);
-        handleHtmlChange(formatted);
-      } else if (activeTab === 'css') {
-        const formatted = formatCSS(project.css);
-        handleCssChange(formatted);
-      } else {
-        const formatted = formatJS(project.js);
-        handleJsChange(formatted);
-      }
-      showToast(`Formatted ${activeTab.toUpperCase()}`, 'success');
+      const formatted = formatHTML(project.html);
+      handleHtmlChange(formatted);
+      showToast('Formatted HTML', 'success');
     } catch (err) {
-      showToast('Error formatting code', 'error');
+      showToast('Error formatting HTML', 'error');
     }
   };
 
-  // Copy All
+  // Copy All HTML
   const handleCopyAll = () => {
-    const bundled = bundleCode(project.html, project.css, project.js, project.name);
-    navigator.clipboard.writeText(bundled);
-    showToast('Copied complete standalone bundle to clipboard', 'success');
+    navigator.clipboard.writeText(project.html);
+    showToast('Copied HTML to clipboard', 'success');
   };
 
   // Download project as standalone HTML file
   const handleDownload = (projToDownload: Project = project) => {
-    const bundled = bundleCode(
-      projToDownload.html,
-      projToDownload.css,
-      projToDownload.js,
-      projToDownload.name
-    );
-    const filename = `${projToDownload.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'preview'}.html`;
-    downloadFile(bundled, filename, 'text/html');
+    const filename = `${projToDownload.name.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'index'}.html`;
+    downloadFile(projToDownload.html, filename, 'text/html');
     showToast(`Downloaded ${filename}`, 'success');
   };
 
@@ -255,17 +238,16 @@ export default function HTMLPreviewer() {
       const content = e.target?.result as string;
       if (!content) return;
 
-      const hasContent = project.html.trim() || project.css.trim() || project.js.trim();
+      const hasContent = project.html.trim().length > 0;
 
       const proceedImport = () => {
-        const extracted = extractCode(content);
         const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
         const updatedProject: Project = {
           ...project,
           name: nameWithoutExt || project.name,
-          html: extracted.html,
-          css: extracted.css,
-          js: extracted.js,
+          html: content,
+          css: '',
+          js: '',
           updatedAt: Date.now(),
         };
 
@@ -278,7 +260,7 @@ export default function HTMLPreviewer() {
         setConfirmDialog({
           isOpen: true,
           title: 'Replace Current Code?',
-          message: `Importing "${file.name}" will replace your current workspace code. Continue?`,
+          message: `Importing "${file.name}" will replace your current workspace HTML code. Continue?`,
           onConfirm: () => {
             setConfirmDialog((c) => ({ ...c, isOpen: false }));
             proceedImport();
@@ -300,18 +282,19 @@ export default function HTMLPreviewer() {
 
   // Template selection
   const handleSelectTemplate = (template: Template) => {
-    const hasContent =
-      (project.html.trim() && project.html !== TEMPLATES[0].html) ||
-      (project.css.trim() && project.css !== TEMPLATES[0].css) ||
-      (project.js.trim() && project.js !== TEMPLATES[0].js);
+    const hasContent = project.html.trim().length > 0;
 
     const applyTemplate = () => {
+      let combinedHtml = template.html;
+      if (template.css?.trim() || template.js?.trim()) {
+        combinedHtml = bundleCode(template.html, template.css || '', template.js || '', template.name);
+      }
       const updated: Project = {
         ...project,
         name: template.name,
-        html: template.html,
-        css: template.css,
-        js: template.js,
+        html: combinedHtml,
+        css: '',
+        js: '',
         updatedAt: Date.now(),
       };
       setProject(updated);
@@ -351,9 +334,9 @@ export default function HTMLPreviewer() {
     const newProj: Project = {
       id: 'proj-' + Date.now(),
       name: `Project ${projectsList.length + 1}`,
-      html: TEMPLATES[0].html,
-      css: TEMPLATES[0].css,
-      js: TEMPLATES[0].js,
+      html: '',
+      css: '',
+      js: '',
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -477,7 +460,6 @@ export default function HTMLPreviewer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project, activeTab, projectsList]);
 
-  const isEmpty = !project.html.trim() && !project.css.trim() && !project.js.trim();
   const isLight = theme === 'light';
 
   return (
@@ -553,36 +535,54 @@ export default function HTMLPreviewer() {
       </div>
 
       {/* Main Workspace */}
-      {isEmpty ? (
-        <EmptyState
-          theme={theme}
-          onStartCoding={() => {
-            const starter = TEMPLATES[0];
-            setProject((prev) => ({
-              ...prev,
-              html: starter.html,
-              css: starter.css,
-              js: starter.js,
-            }));
-          }}
-          onBrowseTemplates={() => setIsTemplatesOpen(true)}
-        />
-      ) : (
-        <div ref={workspaceRef} className="flex-1 min-h-0 flex overflow-hidden relative w-full h-full">
-          {/* MOBILE VIEW (< 768px) */}
-          {!isDesktop ? (
-            mobileTab === 'code' ? (
-              <div className="w-full h-full flex flex-col flex-1 min-h-0 overflow-hidden">
+      <div ref={workspaceRef} className="flex-1 min-h-0 flex overflow-hidden relative w-full h-full">
+        {/* MOBILE VIEW (< 768px) */}
+        {!isDesktop ? (
+          mobileTab === 'code' ? (
+            <div className="w-full h-full flex flex-col flex-1 min-h-0 overflow-hidden">
+              <CodeEditor
+                theme={theme}
+                html={project.html}
+                onChangeHtml={handleHtmlChange}
+                settings={settings}
+                onUpdateSettings={handleUpdateSettings}
+                onFormat={handleFormat}
+                onCopyAll={handleCopyAll}
+                onShowToast={showToast}
+                onImportHtmlFile={handleImportFile}
+              />
+            </div>
+          ) : (
+            <div className="w-full h-full flex flex-col flex-1 min-h-0 overflow-hidden">
+              <PreviewPanel
+                theme={theme}
+                html={project.html}
+                autoRun={settings.autoRun}
+                autoRunDelay={settings.autoRunDelay}
+                onToggleAutoRun={() =>
+                  handleUpdateSettings({ autoRun: !settings.autoRun })
+                }
+                logs={logs}
+                onAddLog={handleAddLog}
+                onClearLogs={handleClearLogs}
+                viewMode="preview"
+                onToggleExpand={() => setMobileTab('code')}
+              />
+            </div>
+          )
+        ) : (
+          /* DESKTOP / TABLET VIEW (>= 768px) */
+          <>
+            {/* Desktop Code Editor Panel */}
+            {(viewMode === 'split' || viewMode === 'editor') && (
+              <div
+                style={viewMode === 'split' ? { width: `${splitPercent}%`, flexShrink: 0 } : { width: '100%' }}
+                className="h-full flex flex-col min-h-0 overflow-hidden"
+              >
                 <CodeEditor
                   theme={theme}
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
                   html={project.html}
-                  css={project.css}
-                  js={project.js}
                   onChangeHtml={handleHtmlChange}
-                  onChangeCss={handleCssChange}
-                  onChangeJs={handleJsChange}
                   settings={settings}
                   onUpdateSettings={handleUpdateSettings}
                   onFormat={handleFormat}
@@ -591,13 +591,32 @@ export default function HTMLPreviewer() {
                   onImportHtmlFile={handleImportFile}
                 />
               </div>
-            ) : (
-              <div className="w-full h-full flex flex-col flex-1 min-h-0 overflow-hidden">
+            )}
+
+            {/* Draggable Divider (Split view only) */}
+            {viewMode === 'split' && (
+              <div
+                onMouseDown={handleDividerMouseDown}
+                className={`w-2.5 border-x cursor-col-resize flex items-center justify-center transition-colors select-none z-10 shrink-0 group ${
+                  isLight
+                    ? 'bg-slate-100 hover:bg-[#7C3AED]/20 active:bg-[#7C3AED] border-slate-200'
+                    : 'bg-[#11161D] hover:bg-[#7C3AED]/50 active:bg-[#7C3AED] border-[#252C36]'
+                }`}
+                title="Drag to resize panels"
+              >
+                <GripVertical className={`w-3 h-3 ${isLight ? 'text-slate-400 group-hover:text-[#7C3AED]' : 'text-[#4B5563] group-hover:text-white'}`} />
+              </div>
+            )}
+
+            {/* Desktop Live Preview Panel */}
+            {(viewMode === 'split' || viewMode === 'preview') && (
+              <div
+                style={viewMode === 'split' ? { flex: 1, minWidth: 0 } : { width: '100%' }}
+                className="h-full flex flex-col min-h-0 overflow-hidden"
+              >
                 <PreviewPanel
                   theme={theme}
                   html={project.html}
-                  css={project.css}
-                  js={project.js}
                   autoRun={settings.autoRun}
                   autoRunDelay={settings.autoRunDelay}
                   onToggleAutoRun={() =>
@@ -606,89 +625,31 @@ export default function HTMLPreviewer() {
                   logs={logs}
                   onAddLog={handleAddLog}
                   onClearLogs={handleClearLogs}
-                  viewMode="preview"
-                  onToggleExpand={() => setMobileTab('code')}
+                  viewMode={viewMode}
+                  onToggleExpand={() =>
+                    setViewMode(viewMode === 'preview' ? 'split' : 'preview')
+                  }
                 />
               </div>
-            )
-          ) : (
-            /* DESKTOP / TABLET VIEW (>= 768px) */
-            <>
-              {/* Desktop Code Editor Panel */}
-              {(viewMode === 'split' || viewMode === 'editor') && (
-                <div
-                  style={viewMode === 'split' ? { width: `${splitPercent}%`, flexShrink: 0 } : { width: '100%' }}
-                  className="h-full flex flex-col min-h-0 overflow-hidden"
-                >
-                  <CodeEditor
-                    theme={theme}
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    html={project.html}
-                    css={project.css}
-                    js={project.js}
-                    onChangeHtml={handleHtmlChange}
-                    onChangeCss={handleCssChange}
-                    onChangeJs={handleJsChange}
-                    settings={settings}
-                    onUpdateSettings={handleUpdateSettings}
-                    onFormat={handleFormat}
-                    onCopyAll={handleCopyAll}
-                    onShowToast={showToast}
-                    onImportHtmlFile={handleImportFile}
-                  />
-                </div>
-              )}
+            )}
+          </>
+        )}
 
-              {/* Draggable Divider (Split view only) */}
-              {viewMode === 'split' && (
-                <div
-                  onMouseDown={handleDividerMouseDown}
-                  className={`w-2.5 border-x cursor-col-resize flex items-center justify-center transition-colors select-none z-10 shrink-0 group ${
-                    isLight
-                      ? 'bg-slate-100 hover:bg-[#7C3AED]/20 active:bg-[#7C3AED] border-slate-200'
-                      : 'bg-[#11161D] hover:bg-[#7C3AED]/50 active:bg-[#7C3AED] border-[#252C36]'
-                  }`}
-                  title="Drag to resize panels"
-                >
-                  <GripVertical className={`w-3 h-3 ${isLight ? 'text-slate-400 group-hover:text-[#7C3AED]' : 'text-[#4B5563] group-hover:text-white'}`} />
-                </div>
-              )}
+        {/* Transparent Overlay during Divider Drag to capture all mouse events smoothly */}
+        {isDragging && (
+          <div className="fixed inset-0 z-50 cursor-col-resize select-none pointer-events-auto" />
+        )}
+      </div>
 
-              {/* Desktop Live Preview Panel */}
-              {(viewMode === 'split' || viewMode === 'preview') && (
-                <div
-                  style={viewMode === 'split' ? { flex: 1, minWidth: 0 } : { width: '100%' }}
-                  className="h-full flex flex-col min-h-0 overflow-hidden"
-                >
-                  <PreviewPanel
-                    theme={theme}
-                    html={project.html}
-                    css={project.css}
-                    js={project.js}
-                    autoRun={settings.autoRun}
-                    autoRunDelay={settings.autoRunDelay}
-                    onToggleAutoRun={() =>
-                      handleUpdateSettings({ autoRun: !settings.autoRun })
-                    }
-                    logs={logs}
-                    onAddLog={handleAddLog}
-                    onClearLogs={handleClearLogs}
-                    viewMode={viewMode}
-                    onToggleExpand={() =>
-                      setViewMode(viewMode === 'preview' ? 'split' : 'preview')
-                    }
-                  />
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Transparent Overlay during Divider Drag to capture all mouse events smoothly */}
-          {isDragging && (
-            <div className="fixed inset-0 z-50 cursor-col-resize select-none pointer-events-auto" />
-          )}
-        </div>
+      {/* AdMob Test Ad Banner */}
+      {settings.showTestAds && (
+        <TestAdBanner
+          theme={theme}
+          unitId={settings.admobTestId || 'ca-app-pub-3940256099942544/9257395921'}
+          format="banner"
+          onDismiss={() => handleUpdateSettings({ showTestAds: false })}
+          showDismiss={true}
+        />
       )}
 
       {/* Modals & Dialogs */}
